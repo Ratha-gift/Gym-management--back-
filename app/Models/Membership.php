@@ -21,8 +21,10 @@ class Membership extends Model
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
+        // datetime, not date — a membership (a Day Pass especially) can
+        // start/end at a specific time of day, not just midnight.
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
         'freeze_start' => 'date',
         'freeze_end' => 'date',
     ];

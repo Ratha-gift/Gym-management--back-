@@ -11,7 +11,7 @@ class MemberController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Member::with(['latestMembership', 'openAttendance'])->latest('created_at');
+        $query = Member::with(['latestMembership', 'activeMembership.package', 'openAttendance'])->latest('created_at');
 
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {

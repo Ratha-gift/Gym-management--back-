@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
     protected $primaryKey = 'user_id';
 
@@ -57,5 +57,25 @@ class User extends Authenticatable
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id', 'role_id');
+    }
+
+    /**
+     * The identifier that gets encoded into the JWT's "sub" claim — the
+     * primary key, same as what Sanctum used to key tokens by.
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Extra claims to embed in the token itself. Kept empty — role/status
+     * can change after a token is issued, so routes should always look them
+     * up fresh from the DB via the resolved user rather than trust a claim
+     * that could go stale before the token expires.
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }

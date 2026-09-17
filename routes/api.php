@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\MembershipController;
 use App\Http\Controllers\Api\MembershipPackageController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\ProductCategoryController;
@@ -23,22 +24,24 @@ use Illuminate\Support\Facades\Route;
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Token-based (Sanctum) API for the Gym Pro React frontend. Every route
+| JWT-based (tymon/jwt-auth) API for the Gym Pro React frontend. Every route
 | below is prefixed with /api by RouteServiceProvider.
 |
 */
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:api')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::patch('/me', [AuthController::class, 'updateProfile']);
     Route::patch('/me/password', [AuthController::class, 'updatePassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
 
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/dashboard/recent-members', [DashboardController::class, 'recentMembers']);
     Route::get('/reports/summary', [ReportController::class, 'summary']);
+    Route::get('/notifications', [NotificationController::class, 'index']);
 
     Route::apiResource('users', UserController::class);
     Route::apiResource('roles', RoleController::class);

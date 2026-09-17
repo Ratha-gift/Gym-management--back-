@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -32,8 +33,10 @@ class AuthController extends Controller
             ]);
         }
 
-        $tokenName = ($credentials['remember'] ?? false) ? 'remember-token' : 'auth-token';
-        $token = $user->createToken($tokenName)->plainTextToken;
+        // "Remember me" only controls where the frontend stores the token
+        // (localStorage vs sessionStorage) — the token's own lifetime comes
+        // from config/jwt.php's ttl either way.
+        $token = JWTAuth::fromUser($user);
 
         return response()->json([
             'user' => $user->load('role'),
@@ -85,8 +88,20 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        JWTAuth::invalidate(JWTAuth::getToken());
 
         return response()->json(['message' => 'Logged out.']);
+    }
+
+    /**
+     * Exchanges a still-valid (not yet expired) token for a fresh one, so
+     * the frontend can silently extend a session instead of forcing a
+     * re-login every time the JWT's ttl elapses.
+     */
+    public function refresh(Request $request)
+    {
+        $token = JWTAuth::refresh(JWTAuth::getToken());
+
+        return response()->json(['token' => $token]);
     }
 }
